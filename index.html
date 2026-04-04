@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Japan Planner</title>
+
+<style>
+body{
+font-family: Arial;
+background:#f5f5f5;
+padding:20px;
+}
+
+.container{
+max-width:800px;
+margin:auto;
+}
+
+.card{
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+button{
+background:#c62828;
+color:white;
+border:none;
+padding:10px;
+margin:5px 0;
+border-radius:5px;
+cursor:pointer;
+}
+
+.block{
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+cursor:grab;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🗾 Japan Planner</h1>
+
+<div class="card">
+
+Tokio <input type="number" id="tokio"><br>
+Kioto <input type="number" id="kioto"><br>
+Osaka <input type="number" id="osaka"><br>
+Nara <input type="checkbox" id="nara"><br><br>
+
+<button onclick="generar()">Generar itinerario</button>
+<button onclick="optimizar()">Optimizar</button>
+<button onclick="test()">Test JS</button>
+
+</div>
+
+<div id="itinerario"></div>
+
+</div>
+
+<!-- 🔴 MUY IMPORTANTE: SCRIPT AL FINAL -->
+<script>
+
+// 🔴 TEST (para comprobar que funciona)
+function test(){
+console.log("JS FUNCIONA");
+alert("JS FUNCIONA");
+}
+
+// 🔴 DATOS
+const planes = {
+tokio:[
+"Shibuya + Harajuku",
+"Asakusa + Ueno",
+"Akihabara + Odaiba",
+"Shinjuku"
+],
+kioto:[
+"Fushimi Inari + Gion",
+"Arashiyama"
+],
+osaka:[
+"Dotonbori",
+"Castillo Osaka"
+]
+};
+
+// 🔴 GENERAR
+function generar(){
+
+let t = parseInt(document.getElementById("tokio").value)||0;
+let k = parseInt(document.getElementById("kioto").value)||0;
+let o = parseInt(document.getElementById("osaka").value)||0;
+let n = document.getElementById("nara").checked;
+
+let html = "";
+let day = 1;
+
+// TOKIO
+for(let i=0;i<t;i++){
+let plan = planes.tokio[i] || planes.tokio[0];
+html += crearDia(day++,"Tokio",plan);
+}
+
+// TRANSPORTE
+if(k>0){
+html += transporte("Tokio → Kioto","🚄 Shinkansen (~2h30)");
+}
+
+// KIOTO
+for(let i=0;i<k;i++){
+let plan = planes.kioto[i] || planes.kioto[0];
+html += crearDia(day++,"Kioto",plan);
+}
+
+// NARA
+if(n){
+html += crearDia(day++,"Nara","Excursión Todai-ji + ciervos");
+}
+
+// OSAKA
+if(o>0){
+html += transporte("Kioto → Osaka","🚆 30 min");
+for(let i=0;i<o;i++){
+let plan = planes.osaka[i] || planes.osaka[0];
+html += crearDia(day++,"Osaka",plan);
+}
+}
+
+document.getElementById("itinerario").innerHTML = html;
+
+activarDrag();
+}
+
+// 🔴 OPTIMIZAR
+function optimizar(){
+document.getElementById("tokio").value=3;
+document.getElementById("kioto").value=2;
+document.getElementById("osaka").value=2;
+document.getElementById("nara").checked=true;
+generar();
+}
+
+// 🔴 BLOQUE DIA
+function crearDia(dia, ciudad, texto){
+return `
+<div class="block" draggable="true">
+<h3>Día ${dia} – ${ciudad}</h3>
+<p>📍 ${texto}</p>
+<p>🚇 Transporte: editar</p>
+<p>💡 Consejo: editar</p>
+</div>
+`;
+}
+
+// 🔴 BLOQUE TRANSPORTE
+function transporte(ruta, info){
+return `
+<div class="card">
+<strong>${ruta}</strong><br>
+${info}
+</div>
+`;
+}
+
+// 🔴 DRAG & DROP
+function activarDrag(){
+
+let dragged;
+
+document.querySelectorAll(".block").forEach(el=>{
+
+el.addEventListener("dragstart",()=>dragged=el);
+
+el.addEventListener("dragover",(e)=>e.preventDefault());
+
+el.addEventListener("drop",(e)=>{
+e.preventDefault();
+if(dragged!==el){
+el.parentNode.insertBefore(dragged, el);
+}
+});
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
